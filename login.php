@@ -1,27 +1,21 @@
 <?php
 session_start();
 
-// Vérifie si l'utilisateur est déjà connecté, s'il l'est, redirige vers l'interface du professeur
+
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
     header("location: professor_interface.php");
     exit;
 }
 
-// Vérifie si le formulaire de connexion a été soumis
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Vérifiez les informations d'identification de l'utilisateur (par exemple, nom d'utilisateur et mot de passe)
-    $username = "erraji"; // Remplacez par le nom d'utilisateur de votre choix
-    $password = "0000"; // Remplacez par le mot de passe de votre choix
+    $username = "erraji"; 
+    $password = "0000"; 
 
-    // Vérifie si les informations d'identification soumises correspondent à celles définies ci-dessus
     if ($_POST['username'] === $username && $_POST['password'] === $password) {
-        // Si les informations d'identification sont correctes, enregistrez l'état de connexion dans la session
         $_SESSION['loggedin'] = true;
-        // Redirige vers l'interface du professeur
         header("location: professor_interface.php");
         exit;
     } else {
-        // Si les informations d'identification sont incorrectes, affichez un message d'erreur
         $error = "Nom d'utilisateur ou mot de passe incorrect.";
     }
 }
@@ -36,7 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <style>
         body {
     font-family: Arial, sans-serif;
-    background-color: #f0f0f0; /* Couleur de fond pastel */
+    background-color: #f0f0f0;
     margin: 0;
     padding: 0;
     display: flex;
@@ -47,14 +41,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 .container {
     width: 350px;
-    background-color: #fff; /* Couleur de fond de la boîte */
+    background-color: #fff; 
     padding: 40px;
     border-radius: 20px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 }
 
 h2 {
-    color: #6699cc; /* Couleur de titre */
+    color: #6699cc;
     margin-bottom: 30px;
     text-transform: uppercase;
     letter-spacing: 2px;
@@ -69,7 +63,7 @@ label {
     display: block;
     text-align: left;
     margin-bottom: 15px;
-    color: #555; /* Couleur de texte des étiquettes */
+    color: #555; 
     font-size: 18px;
     font-weight: bold;
 }
@@ -81,8 +75,8 @@ input[type="password"] {
     margin-bottom: 25px;
     border: none;
     border-radius: 50px;
-    background-color: #f8f8f8; /* Couleur de fond des champs */
-    border: 2px solid #ccc; /* Bordure pastel */
+    background-color: #f8f8f8; 
+    border: 2px solid #ccc; 
     font-size: 16px;
     transition: border-color 0.3s;
 }
@@ -90,15 +84,15 @@ input[type="password"] {
 input[type="text"]:focus,
 input[type="password"]:focus {
     outline: none;
-    border-color: #66cccc; /* Couleur de la bordure lorsqu'elle est sélectionnée */
+    border-color: #66cccc; 
 }
 
 input[type="submit"] {
-    background-color: #66cccc; /* Couleur de fond du bouton */
-    color: #fff; /* Couleur de texte du bouton */
+    background-color: #66cccc; 
+    color: #fff; 
     padding: 15px;
     border: none;
-    border-radius: 50px; /* Coins arrondis */
+    border-radius: 50px; 
     cursor: pointer;
     font-size: 18px;
     text-transform: uppercase;
@@ -107,11 +101,11 @@ input[type="submit"] {
 }
 
 input[type="submit"]:hover {
-    background-color: #4cbbb9; /* Couleur de fond du bouton au survol */
+    background-color: #4cbbb9; 
 }
 
 .error-message {
-    color: #cc3333; /* Couleur du texte d'erreur */
+    color: #cc3333; 
     margin-top: 20px;
     text-align: center;
     font-size: 16px;

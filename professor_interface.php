@@ -4,110 +4,140 @@
     <title>Interface Professeur</title>
     <style>
         body {
-    background-color: #f0f0f0; /* Couleur de fond pastel */
-    font-family: Arial, sans-serif;
-    color: #333; /* Couleur de texte principale */
-    text-align:center;
-}
+            background-color: #f0f0f0; 
+            font-family: Arial, sans-serif;
+            color: #333; 
+            text-align:center;
+        }
 
-h2 {
-    color: #6699cc; /* Couleur de titre */
-}
+        h2 {
+        color: #6699cc; 
+        }
 
-ul {
-    list-style-type: none;
-    padding: 0;
-}
+        ul {
+        list-style-type: none;
+        padding: 0;
+        }
 
-li {
-    margin-bottom: 5px;
-}
+       li {
+        margin-bottom: 5px;
+       }
 
-input[type="text"],
-input[type="submit"] {
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #ccc; /* Bordure pastel */
-    background-color: #f8f8f8; /* Couleur de fond des champs */
-}
+       input[type="text"],
+       input[type="submit"] {
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #ccc; 
+        background-color: #f8f8f8; 
+        }
 
-input[type="submit"] {
-    background-color: #66cccc; /* Couleur de fond du bouton */
-    color: #fff; /* Couleur de texte du bouton */
-    cursor: pointer;
-}
+        input[type="submit"] {
+        background-color: #66cccc; 
+        color: #fff; 
+        cursor: pointer;
+        }
 
-input[type="submit"]:hover {
-    background-color: #4cbbb9; /* Couleur de fond du bouton au survol */
-}
+    input[type="submit"]:hover {
+        background-color: #4cbbb9; 
+    }
 
-label {
-    font-weight: bold;
-}
+    label {
+        font-weight: bold;
+    }
 
-.error {
-    color: #cc3333; /* Couleur du texte d'erreur */
-}
+    .error {
+        color: #cc3333; 
+    }
 
-    </style>
+    .student-list {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .student-list table {
+        margin: 0 auto;
+    }
+
+    .student-list th {
+        background-color: #6699cc;
+        color: #fff;
+        padding: 10px;
+    }
+
+    .student-list td {
+        padding: 5px;
+    }
+</style>
 </head>
 <body>
+    <h2>Selectionner une date pour afficher la liste des etudiants</h2>
+    <form action="professor_interface.php" method="post">
+        <label for="selected_date">Selectionner une date :</label><br>
+        <input type="date" id="selected_date" name="selected_date"><br><br>
+        <input type="submit" value="Afficher la liste">
+    </form>
+
     <?php
-    // Connexion à la base de données
-    $servername = "localhost";
-    $username = "root";
-    $password = "";
-    $dbname = "ouabd";
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "ouabd";
+
+try {
+    $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['selected_date'])) {
+        $selected_date = $_POST['selected_date'];
+
+        $stmt_students = $conn->prepare("SELECT full_name FROM etudiant WHERE date_presence = :selected_date");
+        $stmt_students->bindParam(':selected_date', $selected_date);
+        $stmt_students->execute();
+
+        echo "<div class='student-list'>";
+        echo "<h2>Liste des etudiants pour le " . $selected_date . "</h2>";
+        echo "<table><tr><th>Nom complet de l'etudiant</th></tr>";
+
+        while ($row = $stmt_students->fetch(PDO::FETCH_ASSOC)) {
+            echo "<tr><td>" . $row['full_name'] . "</td></tr>";
+        }
+        echo "</table>";
+        echo "</div>";
+    }
+} catch(PDOException $e) {
+    echo "La requete a echoue : " . $e->getMessage();
+}
+?>
+
+<h2>Mise a jour du code d'acces</h2>
+<form action="professor_interface.php" method="post">
+    <label for="new_code">Nouveau code d'acces :</label><br>
+    <input type="text" id="new_code" name="new_code"><br><br>
+    <input type="submit" value="Mettre a jour">
+</form>
+
+<?php
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['new_code'])) {
+    $new_code = $_POST['new_code'];
 
     try {
         $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        // Récupérer les noms des étudiants avant de supprimer la table
-        $students_before_update = [];
-        $stmt_students = $conn->query("SELECT full_name FROM etudiant");
-        while ($row = $stmt_students->fetch(PDO::FETCH_ASSOC)) {
-            $students_before_update[] = $row['full_name'];
-        }
+        // Supprime l'ancien code d'acces
+        $stmt_delete = $conn->prepare("DELETE FROM access_code");
+        $stmt_delete->execute();
 
-        // Supprimer tous les étudiants avant de mettre à jour le code
-        $stmt_delete_students = $conn->prepare("DELETE FROM etudiant");
-        $stmt_delete_students->execute();
+        // Ajouter le nouveau code d'acces
+        $stmt_insert = $conn->prepare("INSERT INTO access_code (code) VALUES (:code)");
+        $stmt_insert->bindParam(':code', $new_code);
+       $stmt_insert->execute();
 
-        // Mise à jour du code d'accès
-        if ($_SERVER["REQUEST_METHOD"] == "POST") {
-            $new_code = $_POST['new_code'];
-
-            // Supprimer l'ancien code d'accès
-            $stmt_delete = $conn->prepare("DELETE FROM access_code");
-            $stmt_delete->execute();
-
-            // Insérer le nouveau code d'accès
-            $stmt_insert = $conn->prepare("INSERT INTO access_code (code) VALUES (:code)");
-            $stmt_insert->bindParam(':code', $new_code);
-            $stmt_insert->execute();
-
-            echo "Le code d'accès a été mis à jour avec succès.";
-        }
-
-        // Afficher les noms des étudiants avant la mise à jour du code
-        echo "<h2>Étudiants avant la mise à jour du code :</h2>";
-        echo "<ul>";
-        foreach ($students_before_update as $student) {
-            echo "<li>$student</li>";
-        }
-        echo "</ul>";
-
+        echo "Le code d'acces a ete mise a jour avec succes.";
     } catch(PDOException $e) {
-        echo "La requête a échoué : " . $e->getMessage();
+        echo "La requete a echoue : " . $e->getMessage();
     }
-    ?>
-
-    <h2>Mise à jour du code d'accès</h2>
-    <form action="professor_interface.php" method="post">
-        <label for="new_code">Nouveau code d'accès :</label><br>
-        <input type="text" id="new_code" name="new_code"><br><br>
-        <input type="submit" value="Mettre à jour">
-    </form>
+}
+?>
 </body>
 </html>
